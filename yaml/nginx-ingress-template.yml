@@ -1,0 +1,67 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: wwdt
+  namespace: default
+  labels:
+    k8s-app: wwdt
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: wwdt
+  template:
+    metadata:
+      name: wwdt
+      creationTimestamp: null
+      labels:
+        k8s-app: wwdt
+    spec:
+      containers:
+        - name: wwdt
+          image: '192.168.91.11/team/woshitaincai:64'
+          resources: {}
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+status:
+  observedGeneration: 1
+  replicas: 1
+  updatedReplicas: 1
+  readyReplicas: 1
+  availableReplicas: 1
+
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+spec:
+  rules:
+  - host: k9s.com     #必须是域名,nginx-ingress必须与pod在同一个ns
+    http:
+      paths:
+      - backend:
+          serviceName: wwdt   #pod名称
+          servicePort: 8080     #pod端口
+
+# https需要配置此项
+  tls:
+  - hosts:
+    - k8sdashboard.com
+    secretName: nginx-ssl  #https证书名称
