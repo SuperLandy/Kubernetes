@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: centos7-templete
+  namespace: default
+spec:
+  containers:
+  - name: centos-pvc
+    image: 192.168.91.11/woshitiancai/temp_centos7:base
+    ports:
+    - containerPort: 22
+    volumeMounts:
+    - name: data
+      mountPath: /mnt
+    securityContext:
+      privileged: true
+    workingDir: /root
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: tomcat-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: centos
+  name: centos
+  namespace: default
+spec:
+  ports:
+  - name: tcp-22-22
+    port: 22
+    targetPort: 22
+    nodePort: 40044
+    protocol: TCP
+  selector:
+    k8s-app: centos
+  type: NodePort

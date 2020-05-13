@@ -1,0 +1,50 @@
+apiVersion: v1                    #创建基于nfs的pv卷
+kind: PersistentVolume
+metadata:
+  name: pv-nfs-data
+  namespace: default
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes:
+  - ReadWriteMany 
+  nfs: 
+    path: /data
+    server: 192.168.91.12
+  persistentVolumeReclaimPolicy: Recycle 
+
+---
+kind: PersistentVolumeClaim     #创建pvc
+apiVersion: v1
+metadata:
+  name: data
+  namespace: jumpserver
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: centos7-templete
+  namespace: default
+spec:
+  containers:
+  - name: centos-pvc
+    image: 192.168.91.11/woshitiancai/temp_centos7:base
+    ports:
+    - containerPort: 22
+    volumeMounts:            #将pvc(data) 绑定到pod的/mnt目录
+    - name: data
+      mountPath: /mnt
+    securityContext:
+      privileged: true
+    workingDir: /root
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: data
