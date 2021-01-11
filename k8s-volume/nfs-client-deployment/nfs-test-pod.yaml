@@ -1,0 +1,32 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: test-claim
+  namespace: kube-operator
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "managed-nfs-storage"        #storage-class 名称，kubectl get sc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi
+
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: test-pod
+  namespace: kube-operator
+spec:
+  containers:
+  - name: test-pod
+    image: nginx
+    volumeMounts:
+      - name: nfs-pvc                                                      # 将通过nfs创建的pvc挂载到容器中/mnt路径
+        mountPath: "/mnt"
+  restartPolicy: "Never"
+  volumes:
+    - name: nfs-pvc
+      persistentVolumeClaim:
+        claimName: test-claim                                               #名称与pvc中的name一致
