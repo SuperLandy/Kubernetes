@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nexus-web
+  namespace: kube-operator
+spec:
+  rules:
+  - host: nexus.huaweicloud.com
+    http:
+      paths:
+      - backend:
+          serviceName: nexus-web
+          servicePort: 8081

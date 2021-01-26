@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nexus-web
+  namespace: kube-operator
+  labels:
+    app: nexus-web
+spec:
+  ports:
+    - name: nexus-8081
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+  selector:
+    app: nexus
+  type: ClusterIP
+  sessionAffinity: None
