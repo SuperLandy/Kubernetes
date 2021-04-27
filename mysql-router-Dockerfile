@@ -3,18 +3,22 @@ FROM centos:7
 ARG MYSQL_PASS_WORD
 ARG MYSQL_HOST
 
+WORKDIR /opt
+
 RUN set -ex \
     && rpm -ivh https://repo.mysql.com//mysql80-community-release-el7-3.noarch.rpm \
     && yum -y install mysql-router \
     && yum clean all \
     && rm -rf /var/cache/yum* \
+    && useradd mysql -u 1000 -d /opt -M -s /sbin/nologin \
     && rpm -e yum-utils-1.1.31-54.el7_8.noarch yum-plugin-ovl-1.1.31-54.el7_8.noarch yum-plugin-fastestmirror-1.1.31-54.el7_8.noarch yum-3.4.3-168.el7.centos.noarch \
     && rpm -e curl-7.29.0-59.el7.x86_64 rpm-4.11.3-45.el7.x86_64 rpm-libs-4.11.3-45.el7.x86_64 rpm-python-4.11.3-45.el7.x86_64 rpm-build-libs-4.11.3-45.el7.x86_64 \
     && echo $MYSQL_PASS_WORD  \
     && echo $MYSQL_HOST \
-    && echo $MYSQL_PASS_WORD |mysqlrouter --bootstrap root@$MYSQL_HOST   --force --user=root \
-    && sed -i 's/user=root/logging_folder=/g' /etc/mysqlrouter/mysqlrouter.conf
+    && echo $MYSQL_PASS_WORD |mysqlrouter --bootstrap root@$MYSQL_HOST   --force --user=mysql \
+    && sed -i '/user=mysql/a logging_folder= '  /etc/mysqlrouter/mysqlrouter.conf
 
 EXPOSE 6446 6447
 
 CMD [ "mysqlrouter" ]
+
